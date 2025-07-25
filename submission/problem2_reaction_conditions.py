@@ -179,7 +179,7 @@ def create_condition_features(df):
         return None, {}
 
 
-def train_classification_models(X, y_dict, cv_folds=5):
+def train_classification_models(X, y_dict, test_size=0.2, cv_folds=5):
     """
     训练多个分类模型
     """
@@ -197,30 +197,38 @@ def train_classification_models(X, y_dict, cv_folds=5):
         print(f"  类别数: {len(unique_classes)}")
         print(f"  样本分布: {dict(zip(unique_classes, counts))}")
         
+        # 划分训练集和测试集
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y,
+            test_size=test_size,
+            random_state=RANDOM_SEEDS[0],
+            stratify=y
+        )
+
         # 训练模型
         model = RandomForestClassifier(
             n_estimators=100,
             random_state=RANDOM_SEEDS[0],
             n_jobs=-1
         )
-        
-        # 交叉验证
+
+        # 交叉验证仅在训练集上进行
         try:
             cv_scores = cross_val_score(
-                model, X, y,
+                model, X_train, y_train,
                 cv=cv_folds, scoring='accuracy',
                 n_jobs=-1
             )
-            
+
             # 训练最终模型
-            model.fit(X, y)
-            
-            # 预测
-            y_pred = model.predict(X)
-            
+            model.fit(X_train, y_train)
+
+            # 在测试集上预测
+            y_pred = model.predict(X_test)
+
             # 计算指标
-            accuracy = accuracy_score(y, y_pred)
-            precision, recall, f1, support = precision_recall_fscore_support(y, y_pred, average='weighted')
+            accuracy = accuracy_score(y_test, y_pred)
+            precision, recall, f1, support = precision_recall_fscore_support(y_test, y_pred, average='weighted')
             
             results[target_name] = {
                 'model': model,
@@ -232,7 +240,7 @@ def train_classification_models(X, y_dict, cv_folds=5):
                 'recall': recall,
                 'f1_score': f1,
                 'predictions': y_pred,
-                'true_values': y,
+                'true_values': y_test,
                 'unique_classes': unique_classes
             }
             
