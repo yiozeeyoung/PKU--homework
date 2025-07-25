@@ -23,7 +23,7 @@ submission/
 │   ├── problem2_results.csv          # 问题2结果
 │   └── (其他结果文件)
 └── figures/                           # 图表文件夹
-    ├── confusion_matrices.png         # 混淆矩阵图
+    ├── problem2_confusion_matrices.png         # 混淆矩阵图
     ├── feature_importance.png         # 特征重要性图
     └── (其他可视化图表)
 ```
