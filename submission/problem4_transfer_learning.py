@@ -93,7 +93,10 @@ def generate_simulated_data(n_samples, dataset_type):
     features['num_atoms'] = np.random.randint(10, 50, n_samples)
     features['num_bonds'] = features['num_atoms'] + np.random.randint(-5, 15, n_samples)
     features['num_rings'] = np.random.randint(0, 5, n_samples)
-    features['aromatic_atoms'] = np.random.randint(0, features['num_atoms'] // 2, n_samples)
+    # 为每个样本单独生成芳香原子数，避免将数组作为randint的上界
+    features['aromatic_atoms'] = np.array([
+        np.random.randint(0, max(1, int(n // 2))) for n in features['num_atoms']
+    ])
     
     # 原子组成
     features['C_count'] = np.random.randint(5, 30, n_samples)
